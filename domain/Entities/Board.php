@@ -52,7 +52,7 @@ class Board
             if ($position[0] < 0 || $position[1] < 0) {
                 return false;
             }
-            if ($position[0] >= $this->size - 1 || $position[1] >= $this->size - 1) {
+            if ($position[0] >= $this->size || $position[1] >= $this->size) {
                 return false;
             }
             return true;
@@ -62,5 +62,36 @@ class Board
     public function getCell(int $row, int $column): Cell
     {
         return $this->board[$row][$column];
+    }
+
+    public function clickCell(Cell $cell): void {
+        $cell->click();
+        $this->updateCell($cell);
+
+        if ($cell->getValue()) {
+            return;
+        }
+
+        $neighbours = $this->getNeighbours(...$cell->getPosition());
+        foreach ($neighbours as $neighbourPosition) {
+            $neighbour = $this->getCell(...$neighbourPosition);
+            if ($neighbour->isMined() || $neighbour->isClicked()) {
+                continue;
+            }
+
+            $this->clickCell($neighbour);
+        }
+    }
+
+    public function flagCell(Cell $cell, bool $flagged): void
+    {
+        $cell->setFlagged($flagged);
+        $this->updateCell($cell);
+    }
+
+    private function updateCell(Cell $cell): void
+    {
+        $position                                = $cell->getPosition();
+        $this->board[$position[0]][$position[1]] = $cell;
     }
 }

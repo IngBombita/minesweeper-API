@@ -2,8 +2,6 @@
 
 namespace Domain\Entities;
 
-use Domain\ValueObjects\Position;
-
 class Cell
 {
     public function __construct(
@@ -25,9 +23,19 @@ class Cell
         return $this->clicked;
     }
 
+    public function click(): void
+    {
+        $this->clicked = true;
+    }
+
     public function isFlagged(): bool
     {
         return $this->flagged;
+    }
+
+    public function setFlagged(bool $value): void
+    {
+        $this->flagged = $value;
     }
 
     public function getPosition(): array

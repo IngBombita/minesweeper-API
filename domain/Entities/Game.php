@@ -2,7 +2,7 @@
 
 namespace Domain\Entities;
 
-use Domain\Enums\BoxStatus;
+use Domain\Enums\cellStatus;
 use Domain\Enums\GameStatus;
 use Domain\Exceptions\InvalidParameters;
 use Domain\Exceptions\InvalidStateMutation;
@@ -13,6 +13,7 @@ class Game
 
     private string $status;
     private \DateTimeImmutable $startedAt;
+    private int $flagsAvailable = 10;
 
     private function __construct(
         private int   $size,
@@ -29,10 +30,12 @@ class Game
             throw new InvalidParameters("size cannot be minor than " . self::MINIMUM_SIZE);
         }
         if ($mines > $size * $size) {
-            throw new InvalidParameters("cannot be more mines than boxes ");
+            throw new InvalidParameters("cannot be more mines than celles ");
         }
 
-        return new self($size, $mines, self::buildBoard($size, $mines));
+        $game = new self($size, $mines, self::buildBoard($size, $mines));
+        $game->getBoard()->fillCellsValues();
+        return $game;
     }
 
     private static function buildBoard(int $size, int $mines): Board
@@ -53,17 +56,45 @@ class Game
         return new Board($size, $cells);
     }
 
-    public function clickBox(int $x, int $y)
+    public function clickCell(int $row, int $column)
     {
-        $box = $this->board[$x][$y];
-        if ($box->isClicked()) {
-            throw new InvalidStateMutation("box was already clicked");
+        $cell = $this->board->getCell($row, $column);
+        if ($cell->isClicked()) {
+            throw new InvalidStateMutation("cell was already clicked");
         }
 
-        if ($box->isMined()) {
-            $this->status = GameStatus::LOST;
-
+        if ($cell->isMined()) {
+            $this->loose();
         }
+
+        $this->board->clickCell($cell);
+    }
+
+    public function flagCell(int $row, int $column) {
+        if ($this->flagsAvailable === 0) {
+            throw new InvalidStateMutation("cannot flag more cells than mines are in game");
+        }
+
+        $cell = $this->board->getCell($row, $column);
+        if ($cell->isFlagged()) {
+            throw new InvalidStateMutation("cell was already flagged");
+        }
+
+        $this->flagsAvailable--;
+        $this->board->flagCell($cell, true);
+    }
+
+    public function unFlagCell(int $row, int $column) {
+        $cell = $this->board->getCell($row, $column);
+        if (!$cell->isFlagged()) {
+            throw new InvalidStateMutation("cell is not flagged");
+        }
+        $this->flagsAvailable++;
+        $this->board->flagCell($cell, false);
+    }
+
+    public function loose() {
+        $this->status = GameStatus::LOST;
     }
 
     public function getSize(): int
@@ -76,7 +107,6 @@ class Game
         return $this->mines;
     }
 
-    // This is temporary, i dont like the idea of have a board getter
     public function getBoard(): Board
     {
         return $this->board;

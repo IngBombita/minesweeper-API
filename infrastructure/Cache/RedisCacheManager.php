@@ -37,6 +37,13 @@ class RedisCacheManager implements CacheService
         return unserialize($resource, [true]);
     }
 
+    public function getMany($keys)
+    {
+        return array_map(function (string $key) {
+            return $this->get($key);
+        }, $keys);
+    }
+
     public function forgetKeys(array $keys): void
     {
         foreach ($keys as $key) {

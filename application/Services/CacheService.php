@@ -6,6 +6,8 @@ interface CacheService
 {
     public function get(string $key);
 
+    public function getMany(array $key);
+
     public function forget(string $key): void;
 
     public function forgetKeys(array $keys): void;

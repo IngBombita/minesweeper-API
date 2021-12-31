@@ -2,23 +2,26 @@
 
 namespace Presentation\Http\Actions;
 
+use Application\Exceptions\NotFound;
 use Application\Services\GameService;
+use Domain\Enums\CellActions;
 use Domain\Exceptions\InvalidParameters;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\Factory;
+use Illuminate\Validation\Rule;
 use Psr\Http\Message\ServerRequestInterface;
 
-class CreateGameAction
+class UpdateCellAction
 {
     public function __construct(private Factory $validatorFactory, private GameService $gameService)
     {
     }
 
-    public function __invoke(ServerRequestInterface $request)
+    public function __invoke(ServerRequestInterface $request, string $id): JsonResponse
     {
         $body = $request->getParsedBody();
-
         $validator = $this->validatorFactory->make(
             $body,
             $this->getValidationRules(),
@@ -29,11 +32,13 @@ class CreateGameAction
         }
 
         try {
-            $game = $this->gameService->createGame($body['size'], $body['mines']);
-            return Response::json($game);
+            $game = $this->gameService->updateCell($id, $body['action'], $body['row'], $body['column']);
 
+            return Response::json($game);
         } catch (InvalidParameters $e) {
-            return Response::json(['error' => $e->getMessage()], 400);
+            return Response::json(['error' => $e->getMessage(),], 400);
+        } catch (NotFound $e) {
+            return Response::json(['error' => 'Game not found',], 404);
         } catch (\Throwable $e) {
             Log::error($e->getMessage());
             return Response::json(['error' => 'Internal Server Error',], 500);
@@ -43,8 +48,9 @@ class CreateGameAction
     private function getValidationRules(): array
     {
         return [
-            'size' => 'required|integer|min:3',
-            'mines' => 'required|integer|min:1',
+            'action' => ['required', Rule::in(CellActions::values())],
+            'row'    => 'required|integer',
+            'column' => 'required|integer',
         ];
     }
 }

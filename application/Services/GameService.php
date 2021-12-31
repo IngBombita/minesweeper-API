@@ -51,6 +51,7 @@ class GameService
                 throw new InvalidParameters('Action ' . $action . ' cannot be performed in a cell');
         }
 
+        $this->storeGame($game);
         return $game;
     }
 
@@ -60,14 +61,14 @@ class GameService
         if (! $game) {
             throw new NotFound("Game not found with id: " . $gameId);
         }
-        return Game::unserialize($game);
+        return $game;
     }
 
     public function listGames(): array
     {
         $games = $this->cacheService->get(self::GAMES_ID_KEY);
         return array_map(static function ($game) {
-            return Game::unserialize($game);
+            return $game;
         }, $this->cacheService->getMany($games));
     }
 

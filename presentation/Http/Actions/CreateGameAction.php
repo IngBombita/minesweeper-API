@@ -25,7 +25,7 @@ class CreateGameAction
             ['required' => 'The :attribute field is required.']
         );
         if ($validator->fails()) {
-            return Response::json(['error' => $validator->errors()->all(),], 400);
+            return Response::json(['errors' => $validator->errors()->all(),], 400);
         }
 
         try {

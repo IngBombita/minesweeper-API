@@ -64,7 +64,7 @@ class Game extends Model
         $cells = [];
         for ($index = 0; $index < $size * $size; $index++) {
             $row     = (int) floor($index / $size);
-            $column  = $index % $size;
+            $column  =  $index % $size;
             $isMined = in_array($index, $minesCoordinates, true);
 
             $cells[$row][$column] = Cell::create($isMined, [$row, $column]);
@@ -137,6 +137,7 @@ class Game extends Model
     {
         $this->status  = GameStatus::WON;
         $this->endedAt = new \DateTimeImmutable('now');
+        $this->getBoard()->revealMines();
     }
 
     public function getBoard(): Board

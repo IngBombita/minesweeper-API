@@ -1,0 +1,96 @@
+{
+	"info": {
+		"_postman_id": "2f79a877-30b5-4bab-9f94-395e72bc38ac",
+		"name": "Minesweeper",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create game",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"size\": 4,\n    \"mines\": 5\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8000/v1/games",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"v1",
+						"games"
+					]
+				},
+				"description": "Create game"
+			},
+			"response": []
+		},
+		{
+			"name": "Update cell",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"action\": \"click\",\n    \"row\": 1,\n    \"column\": 2\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8000/v1/games/62c7e2a0-20af-4ae2-86f4-1a92ec9b1127/cell",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"v1",
+						"games",
+						"62c7e2a0-20af-4ae2-86f4-1a92ec9b1127",
+						"cell"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get game stats",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": null
+			},
+			"response": []
+		},
+		{
+			"name": "List games",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8000/v1/games",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"v1",
+						"games"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

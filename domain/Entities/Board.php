@@ -142,4 +142,11 @@ class Board extends Model
             0
         );
     }
+
+    public function revealMines(): void
+    {
+        foreach ($this->cells as $cell) {
+            $cell->makeVisible('mined');
+        }
+    }
 }

@@ -1,0 +1,28 @@
+version: '3.2'
+services:
+  redis:
+    image: redis
+    hostname: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis-data:/data
+
+  web:
+    image: ingbombita/php-nginx:php8.0
+    hostname: dev
+    links:
+      - redis
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx:/etc/nginx/sites-available
+      - ./ssl:/etc/nginx/ssl
+      - ../:/var/www
+    environment:
+      TZ: "America/Argentina/Cordoba"
+      COMPOSER_CACHE_DIR: /var/www/.composer
+      COMPOSER_HOME: /var/www/.composer
+      XDEBUG_CONFIG: "remote_host=172.19.0.5"
+      PHP_IDE_CONFIG: "serverName=Docker"

@@ -21,15 +21,13 @@ class Game extends Model
             throw new InvalidParameters("cannot be more mines than celles ");
         }
 
-        $game            = new self();
-        $game->size      = $size;
-        $game->mines     = $mines;
-        $game->board     = self::buildBoard($size, $mines);
-        $game->status    = GameStatus::CREATED;
-        $game->startedAt = new \DateTimeImmutable('now');
-        $game->uuid        = Uuid::uuid4();
+        $game         = new self();
+        $game->size   = $size;
+        $game->mines  = $mines;
+        $game->board  = self::buildBoard($size, $mines);
+        $game->status = GameStatus::CREATED;
+        $game->uuid   = Uuid::uuid4();
 
-        $game->getBoard()->fillCellsValues();
         return $game;
     }
 
@@ -53,6 +51,11 @@ class Game extends Model
 
     public function clickCell(int $row, int $column)
     {
+        if ($this->status != GameStatus::PLAYING) {
+            $this->status    = GameStatus::PLAYING;
+            $this->startedAt = new \DateTimeImmutable('now');
+        }
+
         $cell = $this->board->getCell($row, $column);
         if ($cell->isClicked()) {
             throw new InvalidStateMutation("cell was already clicked");

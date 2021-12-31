@@ -15,15 +15,6 @@ class Board extends Model
         return $board;
     }
 
-    public function fillCellsValues(): void
-    {
-        $this->cells = array_map(function (array $row) {
-            return array_map(function (Cell $cell) {
-                return $this->computeCellValue($cell);
-            }, $row);
-        }, $this->cells);
-    }
-
     private function computeCellValue(Cell $cell): Cell
     {
         if ($cell->isMined()) {
@@ -74,6 +65,7 @@ class Board extends Model
     public function clickCell(Cell $cell): void
     {
         $cell->click();
+        $this->computeCellValue($cell);
         $this->updateCell($cell);
 
         if ($cell->getValue()) {
@@ -99,7 +91,9 @@ class Board extends Model
 
     private function updateCell(Cell $cell): void
     {
-        $position                                = $cell->getPosition();
-        $this->cells[$position[0]][$position[1]] = $cell;
+        $position                          = $cell->getPosition();
+        $cells                             = $this->cells;
+        $cells[$position[0]][$position[1]] = $cell;
+        $this->cells                       = $cells;
     }
 }

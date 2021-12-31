@@ -6,6 +6,7 @@ use Domain\Entities\Board;
 use Domain\Entities\Cell;
 use Domain\Entities\Game;
 use Tests\TestCase;
+use Tests\TestUtils;
 
 class GameTest extends TestCase
 {
@@ -17,26 +18,28 @@ class GameTest extends TestCase
     {
         $sut   = $this->getExampleGame();
         $board = $sut->getBoard();
-        $board->fillCellsValues();
 
-        self::assertEquals(2, $board->getCell(0, 0)->getValue());
-        self::assertEquals(null, $board->getCell(0, 1)->getValue());
-        self::assertEquals(3, $board->getCell(1, 1)->getValue());
-        self::assertEquals(2, $board->getCell(2, 0)->getValue());
-        self::assertEquals(2, $board->getCell(2, 1)->getValue());
-        self::assertEquals(1, $board->getCell(2, 2)->getValue());
-        self::assertEquals(1, $board->getCell(2, 3)->getValue());
-        self::assertEquals(null, $board->getCell(3, 0)->getValue());
-        self::assertEquals(1, $board->getCell(3, 1)->getValue());
-        self::assertEquals(0, $board->getCell(3, 2)->getValue());
-        self::assertEquals(0, $board->getCell(3, 3)->getValue());
+        self::assertEquals(2, $this->callComputeCellValue($board, 0,0));
+        self::assertEquals(null, $this->callComputeCellValue($board,0, 1));
+        self::assertEquals(3, $this->callComputeCellValue($board,1, 1));
+        self::assertEquals(2, $this->callComputeCellValue($board,2, 0));
+        self::assertEquals(2, $this->callComputeCellValue($board,2, 1));
+        self::assertEquals(1, $this->callComputeCellValue($board,2, 2));
+        self::assertEquals(1, $this->callComputeCellValue($board,2, 3));
+        self::assertEquals(null, $this->callComputeCellValue($board,3, 0));
+        self::assertEquals(1, $this->callComputeCellValue($board,3, 1));
+        self::assertEquals(0, $this->callComputeCellValue($board,3, 2));
+        self::assertEquals(0, $this->callComputeCellValue($board,3, 3));
+    }
+
+    private function callComputeCellValue($board, int $row, int $column): ?int {
+        return TestUtils::callMethod($board,'computeCellValue',[$board->getCell($row, $column)])->getValue();
     }
 
     public function testClickCellSuccess(): void
     {
         $sut   = $this->getExampleGame();
         $board = $sut->getBoard();
-        $board->fillCellsValues();
         $sut->clickCell(3, 3);
 
         self::assertEquals(null, $board->getCell(3, 0)->getValue());
@@ -56,18 +59,34 @@ class GameTest extends TestCase
          * 0  0  0  0
          * 1  0  0  0
          */
-        $board           = [
-            [Cell::create(false, [0, 0]), Cell::create(true, [0, 1]), Cell::create(true, [0, 2]), Cell::create(false, [0, 3]),],
-            [Cell::create(true, [1, 0]), Cell::create(false, [1, 1]), Cell::create(false, [1, 2]), Cell::create(true, [1, 3]),],
-            [Cell::create(false, [2, 0]), Cell::create(false, [2, 1]), Cell::create(false, [2, 2]), Cell::create(false, [2, 3]),],
-            [Cell::create(true, [3, 0]), Cell::create(false, [3, 1]), Cell::create(false, [3, 2]), Cell::create(false, [3, 3]),],
+        $cells       = [
+            [
+                Cell::create(false, [0, 0]),
+                Cell::create(true, [0, 1]),
+                Cell::create(true, [0, 2]),
+                Cell::create(false, [0, 3]),
+            ],
+            [
+                Cell::create(true, [1, 0]),
+                Cell::create(false, [1, 1]),
+                Cell::create(false, [1, 2]),
+                Cell::create(true, [1, 3]),
+            ],
+            [
+                Cell::create(false, [2, 0]),
+                Cell::create(false, [2, 1]),
+                Cell::create(false, [2, 2]),
+                Cell::create(false, [2, 3]),
+            ],
+            [
+                Cell::create(true, [3, 0]),
+                Cell::create(false, [3, 1]),
+                Cell::create(false, [3, 2]),
+                Cell::create(false, [3, 3]),
+            ],
         ];
-        $game            = Game::create(4, 5);
-        $gameReflection  = new \ReflectionClass($game);
-        $boardReflection = $gameReflection->getProperty('board');
-        $boardReflection->setAccessible(true);
-        $boardReflection->setValue($game, Board::create(4, $board));
-
+        $game        = Game::create(4, 5);
+        $game->board = Board::create(4, $cells);
         return $game;
     }
 }

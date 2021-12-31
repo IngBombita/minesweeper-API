@@ -6,7 +6,7 @@ namespace Tests;
 class TestUtils
 {
     // Useful to test private methods
-    public static function callMethod(Object $obj, string $name, array $args)
+    public static function callMethod(object $obj, string $name, array $args)
     {
         $class  = new \ReflectionClass($obj);
         $method = $class->getMethod($name);

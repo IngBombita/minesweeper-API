@@ -5,6 +5,7 @@ namespace Domain\Entities;
 use Domain\Enums\BoxStatus;
 use Domain\Enums\GameStatus;
 use Domain\Exceptions\InvalidParameters;
+use Domain\Exceptions\InvalidStateMutation;
 
 class Game
 {
@@ -16,7 +17,7 @@ class Game
     private function __construct(
         private int   $size,
         private int   $mines,
-        private array $board,
+        private Board $board,
     ) {
         $this->status    = GameStatus::CREATED;
         $this->startedAt = new \DateTimeImmutable('now');
@@ -34,17 +35,35 @@ class Game
         return new self($size, $mines, self::buildBoard($size, $mines));
     }
 
-    private static function buildBoard(int $size, int $mines): array {
+    private static function buildBoard(int $size, int $mines): Board
+    {
         $numbers = range(0, $size * $size);
         shuffle($numbers);
         $minesCoordinates = array_slice($numbers, 0, $mines);
 
-        $board = [];
+        $cells = [];
         for ($index = 0; $index < $size * $size; $index++) {
-            $board[floor($index / $size)][$index % $size] = new Box(in_array($index, $minesCoordinates, true));
+            $row     = (int) floor($index / $size);
+            $column  = $index % $size;
+            $isMined = in_array($index, $minesCoordinates, true);
+
+            $cells[$row][$column] = new Cell($isMined, [$row, $column]);
         }
 
-        return $board;
+        return new Board($size, $cells);
+    }
+
+    public function clickBox(int $x, int $y)
+    {
+        $box = $this->board[$x][$y];
+        if ($box->isClicked()) {
+            throw new InvalidStateMutation("box was already clicked");
+        }
+
+        if ($box->isMined()) {
+            $this->status = GameStatus::LOST;
+
+        }
     }
 
     public function getSize(): int
@@ -58,7 +77,7 @@ class Game
     }
 
     // This is temporary, i dont like the idea of have a board getter
-    public function getBoard(): array
+    public function getBoard(): Board
     {
         return $this->board;
     }

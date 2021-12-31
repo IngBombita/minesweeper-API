@@ -6,7 +6,8 @@ use MyCLabs\Enum\Enum;
 
 class GameStatus extends Enum
 {
-    public const CREATED  = 'created';
-    public const PLAYING  = 'playing';
-    public const FINISHED = 'finished';
+    public const CREATED = 'created';
+    public const PLAYING = 'playing';
+    public const WON     = 'won';
+    public const LOST    = 'lost';
 }

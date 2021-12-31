@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Infrastructure\Cache\Adapter\Redis;
+namespace Infrastructure\Cache;
 
 use RuntimeException;
 

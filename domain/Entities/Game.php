@@ -6,6 +6,7 @@ use Domain\Enums\cellStatus;
 use Domain\Enums\GameStatus;
 use Domain\Exceptions\InvalidParameters;
 use Domain\Exceptions\InvalidStateMutation;
+use Ramsey\Uuid\Uuid;
 
 class Game
 {
@@ -14,6 +15,7 @@ class Game
     private string $status;
     private \DateTimeImmutable $startedAt;
     private int $flagsAvailable = 10;
+    private string $id;
 
     private function __construct(
         private int   $size,
@@ -22,6 +24,7 @@ class Game
     ) {
         $this->status    = GameStatus::CREATED;
         $this->startedAt = new \DateTimeImmutable('now');
+        $this->id = Uuid::uuid4()->toString();
     }
 
     public static function create(int $size, int $mines): Game
@@ -110,5 +113,10 @@ class Game
     public function getBoard(): Board
     {
         return $this->board;
+    }
+
+    public function getId(): string
+    {
+        return $this->id;
     }
 }

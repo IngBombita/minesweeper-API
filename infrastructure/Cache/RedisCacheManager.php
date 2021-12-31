@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Infrastructure\Cache;
 
+use Application\Services\CacheService;
 use Illuminate\Cache\Repository;
 
-class RedisCacheManager
+class RedisCacheManager implements CacheService
 {
     private const ONE_WEEK_TTL = 604800;
     private Repository $cacheRepository;

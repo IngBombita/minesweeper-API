@@ -6,6 +6,7 @@ use Application\Exceptions\NotFound;
 use Domain\Entities\Game;
 use Domain\Enums\CellActions;
 use Domain\Exceptions\InvalidParameters;
+use Domain\Exceptions\InvalidStateMutation;
 
 class GameService
 {
@@ -32,6 +33,9 @@ class GameService
     public function updateCell(string $gameId, string $action, int $row, int $column): Game
     {
         $game = $this->retrieveGame($gameId);
+        if ($game->isFinished()) {
+            throw new InvalidStateMutation('the game is finished');
+        }
 
         switch ($action) {
             case CellActions::CLICK:

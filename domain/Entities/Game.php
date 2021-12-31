@@ -18,7 +18,7 @@ class Game extends Model
             throw new InvalidParameters("size cannot be minor than " . self::MINIMUM_SIZE);
         }
         if ($mines > $size * $size) {
-            throw new InvalidParameters("cannot be more mines than celles ");
+            throw new InvalidParameters("cannot be more mines than cells");
         }
 
         $game         = new self();
@@ -116,5 +116,11 @@ class Game extends Model
     public function getId(): string
     {
         return $this->uuid;
+    }
+
+    public function isFinished(): bool
+    {
+        $finishedStatus = [GameStatus::LOST, GameStatus::WON];
+        return in_array($this->status, $finishedStatus, true);
     }
 }

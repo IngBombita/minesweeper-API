@@ -6,6 +6,7 @@ use Application\Exceptions\NotFound;
 use Application\Services\GameService;
 use Domain\Enums\CellActions;
 use Domain\Exceptions\InvalidParameters;
+use Domain\Exceptions\InvalidStateMutation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
@@ -35,6 +36,8 @@ class UpdateCellAction
             $game = $this->gameService->updateCell($id, $body['action'], $body['row'], $body['column']);
 
             return Response::json($game);
+        } catch (InvalidStateMutation $e) {
+            return Response::json(['error' => $e->getMessage(),], 409);
         } catch (InvalidParameters $e) {
             return Response::json(['error' => $e->getMessage(),], 400);
         } catch (NotFound $e) {

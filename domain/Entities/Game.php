@@ -22,7 +22,6 @@ class Game extends Model
         }
 
         $game         = new self();
-        $game->size   = $size;
         $game->mines  = $mines;
         $game->board  = self::buildBoard($size, $mines);
         $game->status = GameStatus::CREATED;
@@ -63,9 +62,19 @@ class Game extends Model
 
         if ($cell->isMined()) {
             $this->loose();
+            return;
         }
 
         $this->board->clickCell($cell);
+        if ($this->checkWin()) {
+            $this->win();
+        }
+    }
+
+    private function checkWin(): bool
+    {
+        $cellsClicked = $this->getBoard()->getClickedCellQuantity();
+        return $cellsClicked === $this->mines;
     }
 
     public function flagCell(int $row, int $column)
@@ -95,17 +104,14 @@ class Game extends Model
 
     public function loose()
     {
-        $this->status = GameStatus::LOST;
+        $this->status  = GameStatus::LOST;
+        $this->endedAt = new \DateTimeImmutable('now');
     }
 
-    public function getSize(): int
+    public function win()
     {
-        return $this->size;
-    }
-
-    public function getMines(): int
-    {
-        return $this->mines;
+        $this->status  = GameStatus::WON;
+        $this->endedAt = new \DateTimeImmutable('now');
     }
 
     public function getBoard(): Board

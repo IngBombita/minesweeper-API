@@ -96,4 +96,23 @@ class Board extends Model
         $cells[$position[0]][$position[1]] = $cell;
         $this->cells                       = $cells;
     }
+
+    public function getClickedCellQuantity(): int
+    {
+        return array_reduce(
+            array_map(static function (array $row) {
+                return array_reduce(
+                    $row,
+                    function ($count, Cell $cell) {
+                        return $count + ($cell->isClicked() ? 1 : 0);
+                    },
+                    0
+                );
+            }, $this->cells),
+            static function ($count, $clicksPerRow) {
+                return $count + $clicksPerRow;
+            },
+            0
+        );
+    }
 }

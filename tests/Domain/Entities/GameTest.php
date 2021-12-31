@@ -43,8 +43,59 @@ class GameTest extends TestCase
             ->andReturn($cell);
         $sut->board->shouldReceive('clickCell')
             ->with($cell);
+        $sut->board->shouldReceive('getClickedCellQuantity')
+            ->andReturn(0);
 
         $sut->clickCell(0,0);
         self::assertEquals(GameStatus::PLAYING, $sut->status);
+    }
+
+    public function testClickCellWinSuccessful(): void
+    {
+        $sut  = Game::create(4, 5);
+        $cell = Cell::create(false, [0, 0]);
+
+        $sut->board = \Mockery::mock(Board::class);
+        $sut->board->shouldReceive('getCell')
+            ->with(0, 0)
+            ->andReturn($cell);
+        $sut->board->shouldReceive('clickCell')
+            ->with($cell);
+        $sut->board->shouldReceive('getClickedCellQuantity')
+            ->andReturn(5);
+
+        $sut->clickCell(0, 0);
+        self::assertEquals(GameStatus::WON, $sut->status);
+    }
+    public function testClickCellLooseSuccessful(): void
+    {
+        $sut = Game::create(4, 5);
+        $cell = Cell::create(true,[0,0]);
+
+        $sut->board = \Mockery::mock(Board::class);
+        $sut->board->shouldReceive('getCell')
+            ->with(0,0)
+            ->andReturn($cell);
+        $sut->clickCell(0,0);
+
+        self::assertEquals(GameStatus::LOST, $sut->status);
+    }
+
+    public function testClickCellInvalid(): void
+    {
+        $sut = Game::create(4, 5);
+        $cell = Cell::create(false,[0,0]);
+
+        $sut->board = \Mockery::mock(Board::class);
+        $sut->board->shouldReceive('getCell')
+            ->with(0,0)
+            ->andReturn($cell);
+        $sut->board->shouldReceive('clickCell')
+            ->with($cell);
+        $sut->board->shouldReceive('getClickedCellQuantity')
+            ->andReturn(5);
+
+        $sut->clickCell(0,0);
+        self::assertEquals(GameStatus::WON, $sut->status);
     }
 }

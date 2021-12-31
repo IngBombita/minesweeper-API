@@ -2,30 +2,15 @@
 
 namespace Domain\Entities;
 
-use Domain\Enums\cellStatus;
 use Domain\Enums\GameStatus;
 use Domain\Exceptions\InvalidParameters;
 use Domain\Exceptions\InvalidStateMutation;
+use Illuminate\Database\Eloquent\Model;
 use Ramsey\Uuid\Uuid;
 
-class Game
+class Game extends Model
 {
     private const MINIMUM_SIZE = 2;
-
-    private string $status;
-    private \DateTimeImmutable $startedAt;
-    private int $flagsAvailable = 10;
-    private string $id;
-
-    private function __construct(
-        private int   $size,
-        private int   $mines,
-        private Board $board,
-    ) {
-        $this->status    = GameStatus::CREATED;
-        $this->startedAt = new \DateTimeImmutable('now');
-        $this->id = Uuid::uuid4()->toString();
-    }
 
     public static function create(int $size, int $mines): Game
     {
@@ -36,7 +21,14 @@ class Game
             throw new InvalidParameters("cannot be more mines than celles ");
         }
 
-        $game = new self($size, $mines, self::buildBoard($size, $mines));
+        $game            = new self();
+        $game->size      = $size;
+        $game->mines     = $mines;
+        $game->board     = self::buildBoard($size, $mines);
+        $game->status    = GameStatus::CREATED;
+        $game->startedAt = new \DateTimeImmutable('now');
+        $game->uuid        = Uuid::uuid4();
+
         $game->getBoard()->fillCellsValues();
         return $game;
     }
@@ -53,10 +45,10 @@ class Game
             $column  = $index % $size;
             $isMined = in_array($index, $minesCoordinates, true);
 
-            $cells[$row][$column] = new Cell($isMined, [$row, $column]);
+            $cells[$row][$column] = Cell::create($isMined, [$row, $column]);
         }
 
-        return new Board($size, $cells);
+        return Board::create($size, $cells);
     }
 
     public function clickCell(int $row, int $column)
@@ -73,7 +65,8 @@ class Game
         $this->board->clickCell($cell);
     }
 
-    public function flagCell(int $row, int $column) {
+    public function flagCell(int $row, int $column)
+    {
         if ($this->flagsAvailable === 0) {
             throw new InvalidStateMutation("cannot flag more cells than mines are in game");
         }
@@ -87,16 +80,18 @@ class Game
         $this->board->flagCell($cell, true);
     }
 
-    public function unFlagCell(int $row, int $column) {
+    public function unFlagCell(int $row, int $column)
+    {
         $cell = $this->board->getCell($row, $column);
-        if (!$cell->isFlagged()) {
+        if (! $cell->isFlagged()) {
             throw new InvalidStateMutation("cell is not flagged");
         }
         $this->flagsAvailable++;
         $this->board->flagCell($cell, false);
     }
 
-    public function loose() {
+    public function loose()
+    {
         $this->status = GameStatus::LOST;
     }
 
@@ -117,6 +112,6 @@ class Game
 
     public function getId(): string
     {
-        return $this->id;
+        return $this->uuid;
     }
 }

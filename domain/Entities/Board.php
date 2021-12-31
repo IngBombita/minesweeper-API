@@ -2,19 +2,26 @@
 
 namespace Domain\Entities;
 
-class Board
+use Illuminate\Database\Eloquent\Model;
+
+class Board extends Model
 {
-    public function __construct(private int $size, private array $board)
+    public static function create(int $size, array $cells): self
     {
+        $board        = new self();
+        $board->size  = $size;
+        $board->cells = $cells;
+
+        return $board;
     }
 
     public function fillCellsValues(): void
     {
-        $this->board = array_map(function (array $row) {
+        $this->cells = array_map(function (array $row) {
             return array_map(function (Cell $cell) {
                 return $this->computeCellValue($cell);
             }, $row);
-        }, $this->board);
+        }, $this->cells);
     }
 
     private function computeCellValue(Cell $cell): Cell
@@ -61,10 +68,11 @@ class Board
 
     public function getCell(int $row, int $column): Cell
     {
-        return $this->board[$row][$column];
+        return $this->cells[$row][$column];
     }
 
-    public function clickCell(Cell $cell): void {
+    public function clickCell(Cell $cell): void
+    {
         $cell->click();
         $this->updateCell($cell);
 
@@ -92,6 +100,6 @@ class Board
     private function updateCell(Cell $cell): void
     {
         $position                                = $cell->getPosition();
-        $this->board[$position[0]][$position[1]] = $cell;
+        $this->cells[$position[0]][$position[1]] = $cell;
     }
 }

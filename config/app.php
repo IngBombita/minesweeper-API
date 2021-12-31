@@ -167,7 +167,6 @@ return [
          * Application Service Providers...
          */
         Infrastructure\ServiceProviders\AppServiceProvider::class,
-        Infrastructure\ServiceProviders\QueryBusServiceProvider::class,
         Infrastructure\ServiceProviders\AuthServiceProvider::class,
         Infrastructure\ServiceProviders\EventServiceProvider::class,
         Infrastructure\ServiceProviders\RouteServiceProvider::class,

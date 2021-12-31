@@ -5,6 +5,8 @@ namespace Presentation\Http\Actions;
 use Application\Services\CacheService;
 use Domain\Entities\Game;
 use Domain\Exceptions\InvalidParameters;
+use Illuminate\Log\Logger;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\Factory;
 use Psr\Http\Message\ServerRequestInterface;
@@ -19,11 +21,11 @@ class CreateGameAction
     {
         $body = $request->getParsedBody();
 
-        $validator = $this->validatorFactory->make($body, $this->getValidationRules());
+        $validator = $this->validatorFactory->make($body, $this->getValidationRules(), ['required' => 'The :attribute field is required.']);
         if ($validator->fails()) {
             return Response::json(
                 [
-                    'error' => $validator->getMessageBag()->first(),
+                    'error' => $validator->errors()->all(),
                 ],
                 400
             );
@@ -33,11 +35,8 @@ class CreateGameAction
         try {
             $game = Game::create($body['size'], $body['mines']);
             $this->cacheService->put('game-' . $game->getId(), $game, null);
-            Response::json(
-                [
-                    'game' => json_encode($game, JSON_THROW_ON_ERROR),
-                ]
-            );
+
+            return Response::json($game);
 
         } catch (InvalidParameters $e) {
             return Response::json(
@@ -47,6 +46,7 @@ class CreateGameAction
                 400
             );
         } catch (\Throwable $e) {
+            Log::error($e->getMessage());
             return Response::json(
                 [
                     'error' => 'Internal Server Error',

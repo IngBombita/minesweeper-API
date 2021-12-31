@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
+use Presentation\Http\Actions\CreateGameAction;
 
 Route::prefix('/v1')->middleware('throttle:60')->group(function () {
     Route::get('/', [\Presentation\Http\Actions\WelcomeAction::class, '__invoke'])->name('welcome');

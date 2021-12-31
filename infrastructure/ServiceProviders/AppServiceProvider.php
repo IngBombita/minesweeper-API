@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Infrastructure\ServiceProviders;
 
 use Application\Interfaces\CurrentUserServiceInterface;
+use Application\Services\CacheService;
 use Application\Services\CurrentUserService;
 use GuzzleHttp\Client;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Infrastructure\Cache\RedisCacheManager;
 use Infrastructure\Hash\HashManager;
 use Infrastructure\Hash\HashManagerInterface;
 use Presentation\Http\View\Components\AppLayout;
@@ -32,15 +34,6 @@ class AppServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        $this->app->bind(HashManagerInterface::class, HashManager::class);
-        $this->app->bind(
-            Client::class,
-            static function () {
-                return new Client(['curl' => [CURLOPT_SSLVERSION => CURL_SSLVERSION_TLSv1_3]]);
-            }
-        );
-        $this->app->singleton(CurrentUserServiceInterface::class, static function () {
-            return new CurrentUserService();
-        });
+        $this->app->bind(CacheService::class, RedisCacheManager::class);
     }
 }

@@ -57,16 +57,16 @@ class GameTest extends TestCase
          * 1  0  0  0
          */
         $board           = [
-            [new Cell(false, [0, 0]), new Cell(true, [0, 1]), new Cell(true, [0, 2]), new Cell(false, [0, 3]),],
-            [new Cell(true, [1, 0]), new Cell(false, [1, 1]), new Cell(false, [1, 2]), new Cell(true, [1, 3]),],
-            [new Cell(false, [2, 0]), new Cell(false, [2, 1]), new Cell(false, [2, 2]), new Cell(false, [2, 3]),],
-            [new Cell(true, [3, 0]), new Cell(false, [3, 1]), new Cell(false, [3, 2]), new Cell(false, [3, 3]),],
+            [Cell::create(false, [0, 0]), Cell::create(true, [0, 1]), Cell::create(true, [0, 2]), Cell::create(false, [0, 3]),],
+            [Cell::create(true, [1, 0]), Cell::create(false, [1, 1]), Cell::create(false, [1, 2]), Cell::create(true, [1, 3]),],
+            [Cell::create(false, [2, 0]), Cell::create(false, [2, 1]), Cell::create(false, [2, 2]), Cell::create(false, [2, 3]),],
+            [Cell::create(true, [3, 0]), Cell::create(false, [3, 1]), Cell::create(false, [3, 2]), Cell::create(false, [3, 3]),],
         ];
         $game            = Game::create(4, 5);
         $gameReflection  = new \ReflectionClass($game);
         $boardReflection = $gameReflection->getProperty('board');
         $boardReflection->setAccessible(true);
-        $boardReflection->setValue($game, new Board(4, $board));
+        $boardReflection->setValue($game, Board::create(4, $board));
 
         return $game;
     }

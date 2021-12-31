@@ -2,15 +2,22 @@
 
 namespace Domain\Entities;
 
-class Cell
+use Illuminate\Database\Eloquent\Model;
+
+class Cell extends Model
 {
-    public function __construct(
-        private bool  $mined,
-        private array $position,
-        private bool  $clicked = false,
-        private bool  $flagged = false,
-        private ?int  $value = null,
-    ) {
+    public static function create(
+        bool  $mined,
+        array $position
+    ): self {
+        $cell           = new self();
+        $cell->mined    = $mined;
+        $cell->position = $position;
+        $cell->clicked  = false;
+        $cell->flagged  = false;
+        $cell->value    = null;
+
+        return $cell;
     }
 
     public function isMined(): bool

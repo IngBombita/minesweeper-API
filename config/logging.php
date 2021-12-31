@@ -16,7 +16,7 @@ return [
     |
     */
 
-    'default' => env('LOG_CHANNEL', 'stack'),
+    'default' => env('LOG_CHANNEL', 'single'),
 
     /*
     |--------------------------------------------------------------------------
@@ -34,50 +34,10 @@ return [
     */
 
     'channels' => [
-        'stack' => [
-            'driver'   => 'stack',
-            'channels' => ['daily', 'slack'],
-        ],
-
         'single' => [
             'driver' => 'single',
             'path'   => storage_path('logs/laravel.log'),
             'level'  => 'debug',
-        ],
-        'slackNormalizeCountries' => [
-            'driver' => 'single',
-            'path'   => storage_path('slackNormalizeCountries/default.log'),
-            'level'  => 'debug',
-        ],
-        'githubNormalizeCountries' => [
-            'driver' => 'single',
-            'path'   => storage_path('githubNormalizeCountries/default.log'),
-            'level'  => 'debug',
-        ],
-
-        'daily' => [
-            'driver' => 'daily',
-            'path'   => storage_path('logs/laravel.log'),
-            'level'  => 'debug',
-            'days'   => 14,
-        ],
-
-        'slack' => [
-            'driver'   => 'slack',
-            'url'      => env('LOG_SLACK_WEBHOOK_URL'),
-            'username' => 'Laravel Log',
-            'emoji'    => ':boom:',
-            'level'    => 'error',
-        ],
-
-        'papertrail' => [
-            'driver'       => 'monolog',
-            'level'        => 'debug',
-            'handler'      => SyslogUdpHandler::class,
-            'handler_with' => [
-                'host' => env('PAPERTRAIL_URL'),
-                'port' => env('PAPERTRAIL_PORT'),
-            ],
         ],
 
         'stderr' => [

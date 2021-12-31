@@ -19,6 +19,33 @@ class Cell extends Model
         $cell->flagged  = false;
         $cell->value    = null;
 
+        $cell->makeVisibleIf($cell->clicked, 'mined');
+
+        return $cell;
+    }
+
+    public function serialize(): array
+    {
+        return [
+            'mined'    => $this->mined,
+            'position' => $this->position,
+            'clicked'  => $this->clicked,
+            'flagged'  => $this->flagged,
+            'value'    => $this->value,
+        ];
+    }
+
+    public static function unserialize(array $props): self
+    {
+        $cell           = new self();
+        $cell->mined    = $props['mined'];
+        $cell->position = $props['position'];
+        $cell->clicked  = $props['clicked'];
+        $cell->flagged  = $props['flagged'];
+        $cell->value    = $props['value'];
+
+        $cell->makeVisibleIf($cell->clicked, 'mined');
+
         return $cell;
     }
 

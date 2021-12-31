@@ -35,7 +35,7 @@ class CreateGameAction
         } catch (InvalidParameters $e) {
             return Response::json(['error' => $e->getMessage()], 400);
         } catch (\Throwable $e) {
-            Log::error($e->getMessage());
+            Log::error($e->getMessage(), $e->getTrace());
             return Response::json(['error' => 'Internal Server Error',], 500);
         }
     }

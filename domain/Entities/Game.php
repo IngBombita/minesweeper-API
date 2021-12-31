@@ -30,6 +30,31 @@ class Game extends Model
         return $game;
     }
 
+    public function serialize(): array
+    {
+        return [
+            'mines'      => $this->mines,
+            'board'      => $this->getBoard()->serialize(),
+            'status'     => $this->status,
+            'uuid'       => $this->uuid,
+            'started_at' => $this->startedAt,
+            'ended_at'   => $this->endedAt,
+        ];
+    }
+
+    public static function unserialize(array $props): self
+    {
+        $game            = new self();
+        $game->mines     = $props['mines'];
+        $game->board     = Board::unserialize($props['board']);
+        $game->status    = $props['status'];
+        $game->uuid      = $props['uuid'];
+        $game->startedAt = $props['started_at'];
+        $game->endedAt   = $props['ended_at'];
+
+        return $game;
+    }
+
     private static function buildBoard(int $size, int $mines): Board
     {
         $numbers = range(0, $size * $size);

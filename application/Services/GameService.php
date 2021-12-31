@@ -21,9 +21,9 @@ class GameService
         $game = Game::create($size, $mines);
 
         $gameKey = 'game-' . $game->getId();
-        $this->cacheService->put($gameKey, $game, null);
+        $this->cacheService->put($gameKey, $game->serialize(), null);
 
-        $games = $this->cacheService->get(self::GAMES_ID_KEY);
+        $games   = $this->cacheService->get(self::GAMES_ID_KEY);
         $games[] = $gameKey;
         $this->cacheService->put('games', $games, null);
 
@@ -60,13 +60,15 @@ class GameService
         if (! $game) {
             throw new NotFound("Game not found with id: " . $gameId);
         }
-        return $game;
+        return Game::unserialize($game);
     }
 
     public function listGames(): array
     {
         $games = $this->cacheService->get(self::GAMES_ID_KEY);
-        return $this->cacheService->getMany($games);
+        return array_map(static function ($game) {
+            return Game::unserialize($game);
+        }, $this->cacheService->getMany($games));
     }
 
     public function storeGame(Game $game): void

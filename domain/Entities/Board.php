@@ -6,11 +6,38 @@ use Illuminate\Database\Eloquent\Model;
 
 class Board extends Model
 {
+    protected $casts = ['cells'];
+
     public static function create(int $size, array $cells): self
     {
         $board        = new self();
         $board->size  = $size;
         $board->cells = $cells;
+
+        return $board;
+    }
+
+    public function serialize(): array
+    {
+        return [
+            'size'  => $this->size,
+            'cells' => array_map(static function ($row) {
+                return array_map(static function (Cell $cell) {
+                    return $cell->serialize();
+                }, $row);
+            }, $this->cells),
+        ];
+    }
+
+    public static function unserialize(array $props): self
+    {
+        $board        = new self();
+        $board->size  = $props['size'];
+        $board->cells = array_map(static function (array $row) {
+            return array_map(static function (array $cell) {
+                return Cell::unserialize($cell);
+            }, $row);
+        }, $props['cells']);
 
         return $board;
     }

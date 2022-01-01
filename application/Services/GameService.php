@@ -61,7 +61,7 @@ class GameService
         if (! $game) {
             throw new NotFound("Game not found with id: " . $gameId);
         }
-        return $game;
+        return Game::unserialize($game);
     }
 
     public function listGames(): array

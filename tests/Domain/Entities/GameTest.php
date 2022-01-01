@@ -75,6 +75,8 @@ class GameTest extends TestCase
             ->with(0,0)
             ->andReturn($cell);
         $sut->board->shouldReceive('revealMines');
+        $sut->board->shouldReceive('clickCell');
+
         $sut->clickCell(0,0);
 
         self::assertEquals(GameStatus::LOST, $sut->status);

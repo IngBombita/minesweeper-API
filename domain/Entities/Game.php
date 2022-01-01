@@ -81,12 +81,12 @@ class Game extends Model
             throw new InvalidStateMutation("cell was already clicked");
         }
 
+        $this->board->clickCell($cell);
         if ($cell->isMined()) {
             $this->finishGame(GameStatus::LOST);
             return;
         }
 
-        $this->board->clickCell($cell);
         if ($this->checkWin()) {
             $this->finishGame(GameStatus::WON);
         }

@@ -25,7 +25,14 @@ You can't see the mines till you click one or win the game.
 - `php artisan key:generate`
 - `php artisan serve`
 
+### Running tests
+
+`./vendor/bin/phpunint`
+
 ## API
+
+All the mines are hidden until you finish the game. The values of each cell is reveled when its clicked, coulb be click "automatically" if you click a empty cell (with value 0) then all the nightbours will be reveled if are not mined.
+Each cell has position attribute to make easer to identify each one.
 
 Note: {host} is refering to the domain where the app is running, usually localhost
 

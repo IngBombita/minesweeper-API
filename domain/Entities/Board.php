@@ -2,14 +2,20 @@
 
 namespace Domain\Entities;
 
+use Domain\Exceptions\InvalidParameters;
 use Illuminate\Database\Eloquent\Model;
 
 class Board extends Model
 {
     protected $casts = ['cells'];
+    private const MINIMUM_SIZE = 3;
 
     public static function create(int $size, array $cells): self
     {
+        if ($size < self::MINIMUM_SIZE) {
+            throw new InvalidParameters("size cannot be minor than " . self::MINIMUM_SIZE);
+        }
+
         $board        = new self();
         $board->size  = $size;
         $board->cells = $cells;
@@ -110,7 +116,7 @@ class Board extends Model
         }
     }
 
-    public function flagCell(Cell $cell, bool $flagged): void
+    public function switchFlagCell(Cell $cell, bool $flagged): void
     {
         $cell->setFlagged($flagged);
         $this->updateCell($cell);

@@ -10,13 +10,9 @@ use Ramsey\Uuid\Uuid;
 
 class Game extends Model
 {
-    private const MINIMUM_SIZE = 2;
 
     public static function create(int $size, int $mines): Game
     {
-        if ($size < self::MINIMUM_SIZE) {
-            throw new InvalidParameters("size cannot be minor than " . self::MINIMUM_SIZE);
-        }
         if ($mines > $size * $size) {
             throw new InvalidParameters("cannot be more mines than cells");
         }
@@ -64,7 +60,7 @@ class Game extends Model
         $cells = [];
         for ($index = 0; $index < $size * $size; $index++) {
             $row     = (int) floor($index / $size);
-            $column  =  $index % $size;
+            $column  = $index % $size;
             $isMined = in_array($index, $minesCoordinates, true);
 
             $cells[$row][$column] = Cell::create($isMined, [$row, $column]);
@@ -86,13 +82,13 @@ class Game extends Model
         }
 
         if ($cell->isMined()) {
-            $this->loose();
+            $this->finishGame(GameStatus::LOST);
             return;
         }
 
         $this->board->clickCell($cell);
         if ($this->checkWin()) {
-            $this->win();
+            $this->finishGame(GameStatus::WON);
         }
     }
 
@@ -114,7 +110,7 @@ class Game extends Model
         }
 
         $this->flagsAvailable--;
-        $this->board->flagCell($cell, true);
+        $this->board->switchFlagCell($cell, true);
     }
 
     public function unFlagCell(int $row, int $column)
@@ -124,18 +120,21 @@ class Game extends Model
             throw new InvalidStateMutation("cell is not flagged");
         }
         $this->flagsAvailable++;
-        $this->board->flagCell($cell, false);
+        $this->board->switchFlagCell($cell, false);
     }
 
-    public function loose()
+    public function finishGame(string $status) : void
     {
-        $this->status  = GameStatus::LOST;
-        $this->endedAt = new \DateTimeImmutable('now');
-    }
+        $finishedStatus = [GameStatus::LOST, GameStatus::WON];
+        if (! in_array($status, $finishedStatus, true)) {
+            throw new InvalidStateMutation('cannot end the game with status: ' . $status);
+        }
 
-    public function win()
-    {
-        $this->status  = GameStatus::WON;
+        if ($status === GameStatus::LOST) {
+            $this->status = GameStatus::LOST;
+        } else {
+            $this->status = GameStatus::WON;
+        }
         $this->endedAt = new \DateTimeImmutable('now');
         $this->getBoard()->revealMines();
     }

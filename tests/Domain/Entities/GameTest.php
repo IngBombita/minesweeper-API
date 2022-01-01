@@ -7,6 +7,7 @@ use Domain\Entities\Cell;
 use Domain\Entities\Game;
 use Domain\Enums\GameStatus;
 use Domain\Exceptions\InvalidParameters;
+use Domain\Exceptions\InvalidStateMutation;
 use Tests\TestCase;
 use Tests\TestUtils;
 
@@ -23,10 +24,6 @@ class GameTest extends TestCase
 
     public function testCreateGameInvalidParameters(): void
     {
-        $this->expectException(InvalidParameters::class);
-        $this->expectExceptionMessage('size cannot be minor than 2');
-        Game::create(0, 5);
-
         $this->expectException(InvalidParameters::class);
         $this->expectExceptionMessage('cannot be more mines than cells');
         Game::create(4, 17);
@@ -63,6 +60,7 @@ class GameTest extends TestCase
             ->with($cell);
         $sut->board->shouldReceive('getClickedCellQuantity')
             ->andReturn(5);
+        $sut->board->shouldReceive('revealMines');
 
         $sut->clickCell(0, 0);
         self::assertEquals(GameStatus::WON, $sut->status);
@@ -76,6 +74,7 @@ class GameTest extends TestCase
         $sut->board->shouldReceive('getCell')
             ->with(0,0)
             ->andReturn($cell);
+        $sut->board->shouldReceive('revealMines');
         $sut->clickCell(0,0);
 
         self::assertEquals(GameStatus::LOST, $sut->status);
@@ -94,13 +93,124 @@ class GameTest extends TestCase
             ->with($cell);
         $sut->board->shouldReceive('getClickedCellQuantity')
             ->andReturn(5);
+        $sut->board->shouldReceive('revealMines');
 
         $sut->clickCell(0,0);
         self::assertEquals(GameStatus::WON, $sut->status);
     }
 
+    public function testFlagCellSuccessful(): void
+    {
+        $sut = Game::create(4, 5);
+        $sut->flagsAvailable = 1;
+        $cell = Cell::create(false,[1,0]);
 
+        $sut->board = \Mockery::mock(Board::class);
+        $sut->board->shouldReceive('getCell')
+            ->with(1,0)
+            ->andReturn($cell);
+        $sut->board->shouldReceive('flagCell')
+            ->with($cell, true);
 
+        $sut->flagCell(1,0);
+        self::assertEquals(0, $sut->flagsAvailable);
+    }
+
+    public function testFlagCellAlreadyFlaggedError(): void
+    {
+        $sut = Game::create(4, 5);
+        $sut->flagsAvailable = 1;
+        $cell = Cell::create(false,[1,0]);
+        $cell->setFlagged(true);
+
+        $sut->board = \Mockery::mock(Board::class);
+        $sut->board->shouldReceive('getCell')
+            ->with(1,0)
+            ->andReturn($cell);
+
+        $this->expectException(InvalidStateMutation::class);
+        $this->expectExceptionMessage('cell was already flagged');
+
+        $sut->flagCell(1,0);
+        self::assertEquals(0, $sut->flagsAvailable);
+    }
+
+    public function testFlagCellNoMoreFlagAvailable(): void
+    {
+        $sut = Game::create(4, 5);
+        $sut->flagsAvailable = 0;
+        $cell = Cell::create(false,[1,0]);
+
+        $sut->board = \Mockery::mock(Board::class);
+        $sut->board->shouldReceive('getCell')
+            ->with(1,0)
+            ->andReturn($cell);
+
+        $this->expectException(InvalidStateMutation::class);
+        $this->expectExceptionMessage('cannot flag more cells than mines are in game');
+
+        $sut->flagCell(1,0);
+        self::assertEquals(0, $sut->flagsAvailable);
+    }
+
+    public function testUnFlagCellSuccessful(): void
+    {
+        $sut = Game::create(4, 5);
+        $sut->flagsAvailable = 0;
+        $cell = Cell::create(false,[1,0]);
+        $cell->setFlagged(true);
+
+        $sut->board = \Mockery::mock(Board::class);
+        $sut->board->shouldReceive('getCell')
+            ->with(1,0)
+            ->andReturn($cell);
+
+        $sut->board->shouldReceive('switchFlagCell')
+            ->with($cell, false);
+
+        $sut->unFlagCell(1,0);
+        self::assertEquals(1, $sut->flagsAvailable);
+    }
+
+    public function testUnFlagCellNotFlagged(): void
+    {
+        $sut = Game::create(4, 5);
+        $sut->flagsAvailable = 0;
+        $cell = Cell::create(false,[1,0]);
+
+        $sut->board = \Mockery::mock(Board::class);
+        $sut->board->shouldReceive('getCell')
+            ->with(1,0)
+            ->andReturn($cell);
+
+        $this->expectException(InvalidStateMutation::class);
+        $this->expectExceptionMessage('cell is not flagged');
+
+        $sut->unFlagCell(1,0);
+        self::assertEquals(1, $sut->flagsAvailable);
+    }
+
+    public function testFinishGameSucessful(): void
+    {
+        $sut = Game::create(4, 5);
+
+        $sut->board = \Mockery::mock(Board::class);
+        $sut->board->shouldReceive('revealMines');
+
+        $sut->finishGame(GameStatus::WON);
+        self::assertEquals(GameStatus::WON, $sut->status);
+    }
+
+    public function testFinishGameFail(): void
+    {
+        $sut = Game::create(4, 5);
+
+        $this->expectException(InvalidStateMutation::class);
+        $this->expectExceptionMessage('cannot end the game with status: playing');
+
+        $sut->finishGame(GameStatus::PLAYING);
+        self::assertEquals(GameStatus::CREATED, $sut->status);
+    }
 
     public function testBoardCellValue(): void
     {

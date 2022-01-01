@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Cell extends Model
 {
-    protected $hidden = ['mined'];
+    protected $hidden = ['mined', 'position'];
 
     public static function create(
         bool  $mined,

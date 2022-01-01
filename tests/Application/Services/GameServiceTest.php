@@ -6,7 +6,6 @@ use Application\Services\CacheService;
 use Application\Services\GameService;
 use Domain\Entities\Game;
 use Domain\Enums\CellActions;
-use Domain\Enums\GameStatus;
 use Mockery;
 use Tests\TestCase;
 
@@ -40,7 +39,7 @@ class GameServiceTest extends TestCase
         $mockCacheService
             ->shouldReceive('get')
             ->with('game-gameID')
-            ->andReturn($mockGame);
+            ->andReturn(Game::create(4, 5)->serialize());
 
         $mockGame->shouldReceive('flagCell')
             ->with(0, 1);

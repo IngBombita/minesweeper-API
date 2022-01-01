@@ -71,7 +71,7 @@ class Game extends Model
 
     public function clickCell(int $row, int $column)
     {
-        if ($this->status != GameStatus::PLAYING) {
+        if ($this->status !== GameStatus::PLAYING) {
             $this->status    = GameStatus::PLAYING;
             $this->startedAt = new \DateTimeImmutable('now');
         }
@@ -94,7 +94,7 @@ class Game extends Model
 
     private function checkWin(): bool
     {
-        $cellsClicked = $this->getBoard()->getClickedCellQuantity();
+        $cellsClicked = $this->getBoard()->getClickedCellsQuantity();
         return $cellsClicked === $this->mines;
     }
 

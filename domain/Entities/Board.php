@@ -3,6 +3,7 @@
 namespace Domain\Entities;
 
 use Domain\Exceptions\InvalidParameters;
+use Domain\Exceptions\InvalidStateMutation;
 use Illuminate\Database\Eloquent\Model;
 
 class Board extends Model
@@ -97,13 +98,13 @@ class Board extends Model
 
     public function clickCell(Cell $cell): void
     {
+        if ($cell->isClicked()) {
+            throw new InvalidStateMutation("the cell had already been clicked");
+        }
+
         $cell->click();
         $this->computeCellValue($cell);
         $this->updateCell($cell);
-
-        if ($cell->getValue()) {
-            return;
-        }
 
         $neighbours = $this->getNeighbours(...$cell->getPosition());
         foreach ($neighbours as $neighbourPosition) {
@@ -124,13 +125,15 @@ class Board extends Model
 
     private function updateCell(Cell $cell): void
     {
-        $position                          = $cell->getPosition();
+        $position = $cell->getPosition();
+
+        // Little trick to avoid Indirect modification of overloaded property
         $cells                             = $this->cells;
         $cells[$position[0]][$position[1]] = $cell;
         $this->cells                       = $cells;
     }
 
-    public function getClickedCellQuantity(): int
+    public function getClickedCellsQuantity(): int
     {
         return array_reduce(
             array_map(static function (array $row) {
@@ -151,8 +154,10 @@ class Board extends Model
 
     public function revealMines(): void
     {
-        foreach ($this->cells as $cell) {
-            $cell->makeVisible('mined');
+        foreach ($this->cells as $row) {
+            foreach ($row as $cell) {
+                $cell->makeVisible('mined');
+            }
         }
     }
 }

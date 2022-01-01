@@ -40,7 +40,7 @@ class GameTest extends TestCase
             ->andReturn($cell);
         $sut->board->shouldReceive('clickCell')
             ->with($cell);
-        $sut->board->shouldReceive('getClickedCellQuantity')
+        $sut->board->shouldReceive('getClickedCellsQuantity')
             ->andReturn(0);
 
         $sut->clickCell(0,0);
@@ -58,7 +58,7 @@ class GameTest extends TestCase
             ->andReturn($cell);
         $sut->board->shouldReceive('clickCell')
             ->with($cell);
-        $sut->board->shouldReceive('getClickedCellQuantity')
+        $sut->board->shouldReceive('getClickedCellsQuantity')
             ->andReturn(5);
         $sut->board->shouldReceive('revealMines');
 
@@ -91,7 +91,7 @@ class GameTest extends TestCase
             ->andReturn($cell);
         $sut->board->shouldReceive('clickCell')
             ->with($cell);
-        $sut->board->shouldReceive('getClickedCellQuantity')
+        $sut->board->shouldReceive('getClickedCellsQuantity')
             ->andReturn(5);
         $sut->board->shouldReceive('revealMines');
 
@@ -109,7 +109,7 @@ class GameTest extends TestCase
         $sut->board->shouldReceive('getCell')
             ->with(1,0)
             ->andReturn($cell);
-        $sut->board->shouldReceive('flagCell')
+        $sut->board->shouldReceive('switchFlagCell')
             ->with($cell, true);
 
         $sut->flagCell(1,0);
